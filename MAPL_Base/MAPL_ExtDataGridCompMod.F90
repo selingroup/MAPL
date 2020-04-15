@@ -4640,6 +4640,12 @@ CONTAINS
       real, pointer    :: ptr(:,:,:)
       real, allocatable :: ptemp(:,:,:)
       integer :: lm
+      integer :: ls, le
+
+      ! debugging
+      if ( Ext_Debug > 0 .and. mapl_am_i_root() ) then
+         write(*,'(3a,2(x,I4))') '   --> MAPL_ExtDataFlipVertical: vertically flipping all levels for ', trim(item%name)
+      end if
 
       if (item%isVector) then
 
@@ -4655,13 +4661,17 @@ CONTAINS
          _VERIFY(STATUS)
          allocate(ptemp,source=ptr,stat=status)
          _VERIFY(status)
-         lm = size(ptr,3)
-         ptr(:,:,lm:1:-1) = ptemp(:,:,1:lm:+1)
+         !lm = size(ptr,3)
+         ls = lbound(ptr,3)
+         le = ubound(ptr,3)
+         !ptr(:,:,lm:1:-1) = ptemp(:,:,1:lm:+1)
+         ptr(:,:,le:ls:-1) = ptemp(:,:,ls:le:+1)
 
          call ESMF_FieldGet(Field2,0,farrayPtr=ptr,rc=status)
          _VERIFY(STATUS)
          ptemp=ptr
-         ptr(:,:,lm:1:-1) = ptemp(:,:,1:lm:+1)
+         !ptr(:,:,lm:1:-1) = ptemp(:,:,1:lm:+1)
+         ptr(:,:,le:ls:-1) = ptemp(:,:,ls:le:+1)
 
          deallocate(ptemp)
 
@@ -4677,15 +4687,15 @@ CONTAINS
          _VERIFY(STATUS)
          allocate(ptemp,source=ptr,stat=status)
          _VERIFY(status)
-         lm = size(ptr,3)
-         ptr(:,:,lm:1:-1) = ptemp(:,:,1:lm:+1)
+         !lm = size(ptr,3)
+         ls = lbound(ptr,3)
+         le = ubound(ptr,3)
+         !ptr(:,:,lm:1:-1) = ptemp(:,:,1:lm:+1)
+         ptr(:,:,le:ls:-1) = ptemp(:,:,ls:le:+1)
+         
          deallocate(ptemp)
       end if
 
-      ! debugging
-      if ( Ext_Debug > 0 .and. mapl_am_i_root() ) then
-         write(*,'(3a,2(x,I4))') '   --> MAPL_ExtDataFlipVertical: vertically flipping all levels for ', trim(item%name)
-      end if
 
 
       _RETURN(ESMF_SUCCESS)
